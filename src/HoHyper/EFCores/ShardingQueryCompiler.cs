@@ -101,20 +101,18 @@ using System.Reflection;
 using System.Runtime.ExceptionServices;
 using System.Threading;
 using System.Threading.Tasks;
-using EFCore.Sharding.Extensions.Commons;
-using EFCore.Sharding.Extensions.ShardingAccessors;
+using HoHyper;
+using HoHyper.ShardingCore.ShardingAccessors;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
-using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Internal;
-using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Query;
 using Microsoft.EntityFrameworkCore.Query.Internal;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.DependencyInjection;
 using Remotion.Linq.Clauses.StreamedData;
 
-namespace EFCore.Sharding.Extensions.EFCore
+namespace HoHyper.EFCores
 {
     /**
 	 * 描述：

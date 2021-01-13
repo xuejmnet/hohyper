@@ -2,9 +2,9 @@
 
     <PropertyGroup>
         <TargetFramework>netstandard2.0</TargetFramework>
-        <Version>$(EFCORE3)</Version>
+        <Version>$(EFCORE2)</Version>
         <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
-        <DefineConstants>TRACE;DEBUG;EFCORE3;</DefineConstants>
+        <DefineConstants>TRACE;DEBUG;EFCORE2;</DefineConstants>
         <LangVersion>8.0</LangVersion>
     </PropertyGroup>
 
@@ -12,17 +12,17 @@
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     </PropertyGroup>
 
-
     <ItemGroup>
         <Compile Include="..\..\src\HoHyper\**\*.cs" />
         <Compile Remove="..\..\src\HoHyper\obj\**" />
         <Compile Remove="..\..\src\HoHyper\bin\**" />
     </ItemGroup>
+
     <ItemGroup>
-        <PackageReference Include="Microsoft.EntityFrameworkCore" Version="3.1.10" />
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="3.1.10" />
-        <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="3.1.6" />
-        <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="3.1.10" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore" Version="2.2.6" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="2.2.6" />
+        <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="2.1.0" />
+        <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="2.2.0" />
     </ItemGroup>
 
 </Project>

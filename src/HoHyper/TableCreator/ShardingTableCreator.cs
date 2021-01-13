@@ -10,11 +10,6 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-#if EFCORE2
-using System.Data.SqlClient;
-#endif
-#if !EFCORE2
-#endif
 
 namespace HoHyper.TableCreator
 {

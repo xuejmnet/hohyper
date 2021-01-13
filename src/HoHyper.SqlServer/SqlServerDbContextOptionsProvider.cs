@@ -1,13 +1,14 @@
 using HoHyper.DbContexts.VirtualDbContexts;
 using HoHyper.EFCores;
-using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Query.Internal;
+
 #if EFCORE2
 using System.Data.SqlClient;
 #endif
 #if !EFCORE2
+using Microsoft.Data.SqlClient;
 #endif
 
 namespace HoHyper.SqlServer

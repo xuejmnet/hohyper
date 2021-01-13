@@ -97,10 +97,10 @@ namespace HoHyper.SqlServer.EFCores
 #if EFCORE2
 using System.Linq;
 using System.Linq.Expressions;
-using EFCore.Sharding.Extensions.Commons;
-using EFCore.Sharding.Extensions.Extensions;
-using EFCore.Sharding.Extensions.ShardingAccessors;
-using EFCore.Sharding.Extensions.Shardings.VirtualTables;
+using HoHyper;
+using HoHyper.Extensions;
+using HoHyper.ShardingCore.ShardingAccessors;
+using HoHyper.ShardingCore.VirtualTables;
 using Microsoft.EntityFrameworkCore.Query.Expressions;
 using Microsoft.EntityFrameworkCore.Query.Sql;
 using Microsoft.EntityFrameworkCore.SqlServer.Infrastructure.Internal;
@@ -108,7 +108,7 @@ using Microsoft.EntityFrameworkCore.SqlServer.Query.Sql.Internal;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace EFCore.Sharding.Extensions.SqlServer.EFCores
+namespace HoHyper.SqlServer.EFCores
 {
 /*
 * @Author: xjm
