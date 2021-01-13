@@ -1,6 +1,4 @@
-using HoHyper.ShardingCore.Internal.ShardingAccessors;
-
-namespace HoHyper.ShardingCore.Internal
+namespace HoHyper.ShardingCore.ShardingAccessors
 {
 /*
 * @Author: xjm

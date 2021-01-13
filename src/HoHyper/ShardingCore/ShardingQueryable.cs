@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using HoHyper.DbContexts;
 using HoHyper.Extensions;
 using HoHyper.ShardingCore.Internal;
-using HoHyper.ShardingCore.Internal.ShardingAccessors;
+using HoHyper.ShardingCore.ShardingAccessors;
 using HoHyper.ShardingCore.VirtualRoutes;
 using HoHyper.ShardingCore.VirtualTables;
 using HoHyper.ShardingExtensions;

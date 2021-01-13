@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using HoHyper.Extensions;
 using HoHyper.ShardingCore.VirtualTables;
 
-namespace HoHyper.ShardingCore.Internal.ShardingAccessors
+namespace HoHyper.ShardingCore.ShardingAccessors
 {
 /*
 * @Author: xjm

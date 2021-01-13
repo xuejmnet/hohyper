@@ -1,7 +1,7 @@
 ﻿#if !EFCORE2
 using System.Linq.Expressions;
 using System.Threading;
-using HoHyper.ShardingCore.Internal.ShardingAccessors;
+using HoHyper.ShardingCore.ShardingAccessors;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.EntityFrameworkCore.Infrastructure;

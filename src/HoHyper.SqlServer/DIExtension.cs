@@ -2,7 +2,7 @@ using System;
 using HoHyper.DbContexts;
 using HoHyper.DbContexts.VirtualDbContexts;
 using HoHyper.ShardingCore.Internal;
-using HoHyper.ShardingCore.Internal.ShardingAccessors;
+using HoHyper.ShardingCore.ShardingAccessors;
 using HoHyper.ShardingCore.ShardingProviders;
 using HoHyper.ShardingCore.VirtualRoutes;
 using HoHyper.ShardingCore.VirtualTables;

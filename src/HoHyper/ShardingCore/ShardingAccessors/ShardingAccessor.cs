@@ -1,7 +1,7 @@
 using System.Threading;
 using HoHyper.ShardingCore.VirtualTables;
 
-namespace HoHyper.ShardingCore.Internal.ShardingAccessors
+namespace HoHyper.ShardingCore.ShardingAccessors
 {
 /*
 * @Author: xjm

@@ -2,7 +2,7 @@
 using System.Linq;
 using System.Linq.Expressions;
 using HoHyper.Extensions;
-using HoHyper.ShardingCore.Internal.ShardingAccessors;
+using HoHyper.ShardingCore.ShardingAccessors;
 using HoHyper.ShardingCore.VirtualTables;
 using Microsoft.EntityFrameworkCore.Query;
 using Microsoft.EntityFrameworkCore.Query.SqlExpressions;
