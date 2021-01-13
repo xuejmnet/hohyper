@@ -6,6 +6,12 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HoHyper", "src\HoHyper\HoHy
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HoHyper.SqlServer", "src\HoHyper.SqlServer\HoHyper.SqlServer.csproj", "{3AD52793-B71E-425B-B6A3-DA834D50FA2D}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src3x", "src3x", "{24BD40E8-E11D-4009-BD5C-61112C5E9913}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HoHyper.3x", "src3x\HoHyper.3x\HoHyper.3x.csproj", "{83142D00-A35C-4486-8E08-16B487513D4F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HoHyper.SqlServer.3x", "src3x\HoHyper.SqlServer.3x\HoHyper.SqlServer.3x.csproj", "{F71F2033-2A4F-40EE-91D2-81158ACC1F29}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -14,6 +20,8 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{6E5CB1FE-8E79-497D-9BAA-A7708F2BB7CB} = {16646522-D54B-4477-A711-ED605D27E4B5}
 		{3AD52793-B71E-425B-B6A3-DA834D50FA2D} = {16646522-D54B-4477-A711-ED605D27E4B5}
+		{83142D00-A35C-4486-8E08-16B487513D4F} = {24BD40E8-E11D-4009-BD5C-61112C5E9913}
+		{F71F2033-2A4F-40EE-91D2-81158ACC1F29} = {24BD40E8-E11D-4009-BD5C-61112C5E9913}
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{6E5CB1FE-8E79-497D-9BAA-A7708F2BB7CB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -24,5 +32,13 @@ Global
 		{3AD52793-B71E-425B-B6A3-DA834D50FA2D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3AD52793-B71E-425B-B6A3-DA834D50FA2D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3AD52793-B71E-425B-B6A3-DA834D50FA2D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{83142D00-A35C-4486-8E08-16B487513D4F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{83142D00-A35C-4486-8E08-16B487513D4F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{83142D00-A35C-4486-8E08-16B487513D4F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{83142D00-A35C-4486-8E08-16B487513D4F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F71F2033-2A4F-40EE-91D2-81158ACC1F29}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F71F2033-2A4F-40EE-91D2-81158ACC1F29}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F71F2033-2A4F-40EE-91D2-81158ACC1F29}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F71F2033-2A4F-40EE-91D2-81158ACC1F29}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
