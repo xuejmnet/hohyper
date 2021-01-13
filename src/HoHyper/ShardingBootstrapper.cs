@@ -71,7 +71,6 @@ namespace HoHyper
                 }
                 //添加物理表
                 virtualTable.AddPhysicTable(new DefaultPhysicTable(virtualTable.GetOriginalTableName(),virtualTable.ShardingConfig.TailPrefix,tail,virtualTable.EntityType));
-
             }
             
         }
