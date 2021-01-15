@@ -61,8 +61,8 @@ namespace HoHyper.TableCreator
                     }
                     catch (Exception ex)
                     {
-                        _logger.LogError("初始化创建表出错", ex);
-                        throw new ShardingCreateException("初始化创建表出错", ex);
+                        _logger.LogWarning($"create table error：{ex}");
+                        throw new ShardingCreateException("create table error:", ex);
                     }
 
                 }

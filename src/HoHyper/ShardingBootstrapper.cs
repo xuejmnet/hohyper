@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using HoHyper.DbContexts;
@@ -21,31 +22,36 @@ namespace HoHyper
 * @Date: Monday, 21 December 2020 09:10:07
 * @Email: 326308290@qq.com
 */
-    public class ShardingBootstrapper:BackgroundService
+    public class ShardingBootstrapper : BackgroundService
     {
         private readonly IServiceProvider _serviceProvider;
         private readonly IVirtualTableManager _virtualTableManager;
         private readonly IShardingTableCreator _tableCreator;
         private readonly ILogger<ShardingBootstrapper> _logger;
         private readonly IShardingDbContextFactory _shardingDbContextFactory;
+        private readonly HoHyperConfig _hoHyperConfig;
 
-        public ShardingBootstrapper(IServiceProvider serviceProvider,IVirtualTableManager virtualTableManager
-            ,IShardingTableCreator tableCreator,ILogger<ShardingBootstrapper> logger,
-            IShardingDbContextFactory shardingDbContextFactory)
+        public ShardingBootstrapper(IServiceProvider serviceProvider, IVirtualTableManager virtualTableManager
+            , IShardingTableCreator tableCreator, ILogger<ShardingBootstrapper> logger,
+            IShardingDbContextFactory shardingDbContextFactory, HoHyperConfig hoHyperConfig)
         {
+            ShardingContainer.SetServices(serviceProvider);
             _serviceProvider = serviceProvider;
             _virtualTableManager = virtualTableManager;
             _tableCreator = tableCreator;
             _logger = logger;
             _shardingDbContextFactory = shardingDbContextFactory;
+            _hoHyperConfig = hoHyperConfig;
         }
 
         public void Start()
         {
+            EnsureCreated();
             var virtualTables = _virtualTableManager.GetAllVirtualTables();
             using var scope = _serviceProvider.CreateScope();
             var dbContextOptionsProvider = scope.ServiceProvider.GetService<IDbContextOptionsProvider>();
-            using var context = _shardingDbContextFactory.Create(new ShardingDbContextOptions(dbContextOptionsProvider.GetDbContextOptions(),string.Empty,virtualTables.GetVirtualTableDbContextConfigs()));
+            using var context = _shardingDbContextFactory.Create(new ShardingDbContextOptions(dbContextOptionsProvider.GetDbContextOptions(), string.Empty, virtualTables.GetVirtualTableDbContextConfigs()));
+
             foreach (var virtualTable in virtualTables)
             {
                 //获取ShardingEntity的实际表名
@@ -53,26 +59,44 @@ namespace HoHyper
                 var tableName = context.Model.FindEntityType(virtualTable.EntityType).GetTableName();
 #endif
 #if EFCORE2
-                var tableName = context.Model.FindEntityType(virtualTable.EntityType).Relational().TableName;  
+                var tableName = context.Model.FindEntityType(virtualTable.EntityType).Relational().TableName;
 #endif
                 virtualTable.SetOriginalTableName(tableName);
                 CreateDataTable(virtualTable);
             }
         }
 
+        public void EnsureCreated()
+        {
+            if (_hoHyperConfig.EnsureCreated)
+            {
+                using var scope = _serviceProvider.CreateScope();
+                var dbContextOptionsProvider = scope.ServiceProvider.GetService<IDbContextOptionsProvider>();
+                using var context = _shardingDbContextFactory.Create(new ShardingDbContextOptions(dbContextOptionsProvider.GetDbContextOptions(), string.Empty, new List<VirtualTableDbContextConfig>(), true));
+                context.Database.EnsureCreated();
+            }
+        }
+
         private void CreateDataTable(IVirtualTable virtualTable)
         {
             var shardingConfig = virtualTable.ShardingConfig;
-            foreach (var tail in virtualTable.GetShardingOwnerTails())
+            foreach (var tail in virtualTable.GetShardingProviderTails())
             {
                 if (shardingConfig.AutoCreateTable)
                 {
-                    _tableCreator.CreateTable(virtualTable.EntityType, tail);
+                    try
+                    {
+                        _tableCreator.CreateTable(virtualTable.EntityType, tail);
+                    }
+                    catch (Exception e)
+                    {
+                        _logger.LogWarning($"table :{virtualTable.GetOriginalTableName()}{shardingConfig.TailPrefix}{tail} will created");
+                    }
                 }
+
                 //添加物理表
-                virtualTable.AddPhysicTable(new DefaultPhysicTable(virtualTable.GetOriginalTableName(),virtualTable.ShardingConfig.TailPrefix,tail,virtualTable.EntityType));
+                virtualTable.AddPhysicTable(new DefaultPhysicTable(virtualTable.GetOriginalTableName(), virtualTable.ShardingConfig.TailPrefix, tail, virtualTable.EntityType));
             }
-            
         }
 
         protected override Task ExecuteAsync(CancellationToken stoppingToken)

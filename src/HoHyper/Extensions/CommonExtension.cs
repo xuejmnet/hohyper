@@ -60,9 +60,9 @@ namespace HoHyper.Extensions
         {
             return  express.Method.DeclaringType.Namespace.IsIn("System.Linq", "System.Collections.Generic") && methodName == nameof(IList.Contains);
         }
-        public static ISet<Type> ParseQueryableRoute(this IQueryable queryable,IVirtualTableManager virtualTableManager)
+        public static ISet<Type> ParseQueryableRoute(this IQueryable queryable)
         {
-            return ShardingKeyUtil.GetShardingEntitiesFilter(queryable, virtualTableManager);
+            return ShardingKeyUtil.GetShardingEntitiesFilter(queryable);
         }
     }
 }

@@ -67,9 +67,9 @@ namespace HoHyper.Utils
         }
 
 
-        public static ISet<Type> GetShardingEntitiesFilter(IQueryable queryable, IVirtualTableManager virtualTableManager)
+        public static ISet<Type> GetShardingEntitiesFilter(IQueryable queryable)
         {
-            ShardingEntitiesVisitor visitor = new ShardingEntitiesVisitor(virtualTableManager);
+            ShardingEntitiesVisitor visitor = new ShardingEntitiesVisitor();
 
             visitor.Visit(queryable.Expression);
 

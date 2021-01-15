@@ -85,7 +85,7 @@ namespace HoHyper.ShardingCore.VirtualTables
             return GetVirtualRoute();
         }
 
-        public List<string> GetShardingOwnerTails()
+        public List<string> GetShardingProviderTails()
         {
             return _shardingProvider.GetExistsPhysicTableTails();
         }

@@ -62,7 +62,7 @@ namespace HoHyper.ShardingCore.VirtualTables
         /// <see cref="ShardingBootstrapper.CreateDateTable(IVirtualTable)"/>
         /// </summary>
         /// <returns></returns>
-        List<string> GetShardingOwnerTails();
+        List<string> GetShardingProviderTails();
     }
 
     public interface IVirtualTable<T> : IVirtualTable where T : class, IShardingEntity

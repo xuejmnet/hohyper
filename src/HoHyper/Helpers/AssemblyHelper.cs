@@ -25,12 +25,16 @@ namespace HoHyper.Helpers
             CurrentDomain = new AssemblyHelper();
         }
 
+        // public Assembly[] GetAssemblies()
+        // {
+        //     return DependencyContext.Default.RuntimeLibraries.Where(IsCandidateLibrary)
+        //         .SelectMany(l => l.GetDefaultAssemblyNames(DependencyContext.Default))
+        //         .Select(assembly => Assembly.Load(new AssemblyName(assembly.Name)))
+        //         .ToArray();
+        // }
         public Assembly[] GetAssemblies()
         {
-            return DependencyContext.Default.RuntimeLibraries.Where(IsCandidateLibrary)
-                .SelectMany(l => l.GetDefaultAssemblyNames(DependencyContext.Default))
-                .Select(assembly => Assembly.Load(new AssemblyName(assembly.Name)))
-                .ToArray();
+            return AppDomain.CurrentDomain.GetAssemblies();
         }
 
         private static bool IsCandidateLibrary(RuntimeLibrary library)

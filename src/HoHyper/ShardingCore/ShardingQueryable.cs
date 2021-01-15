@@ -209,7 +209,7 @@ namespace HoHyper.ShardingCore
 
             if (_autoParseRoute)
             {
-                var shardingEntities = _source.ParseQueryableRoute(_virtualTableManager);
+                var shardingEntities = _source.ParseQueryableRoute();
                 var autoRoutes = shardingEntities.Where(o => !_routes.ContainsKey(o)).ToList();
                 foreach (var shardingEntity in autoRoutes)
                 {

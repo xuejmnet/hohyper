@@ -1,6 +1,8 @@
 using System;
+using System.Collections.Generic;
 using HoHyper.DbContexts;
 using HoHyper.DbContexts.VirtualDbContexts;
+using HoHyper.Helpers;
 using HoHyper.ShardingCore.Internal;
 using HoHyper.ShardingCore.ShardingAccessors;
 using HoHyper.ShardingCore.ShardingProviders;
@@ -30,6 +32,7 @@ namespace HoHyper.SqlServer
         {
             if (configure == null)
                 throw new ArgumentNullException($"AddScfSqlServerProvider 参数不能为空:{nameof(configure)}");
+           
             var options = new SqlServerOptions();
             configure(options);
             services.AddSingleton(options);
@@ -49,9 +52,14 @@ namespace HoHyper.SqlServer
                 services.AddSingleton(typeof(IShardingProvider), shardingEntry.ShardingOwner);
                 services.AddSingleton(typeof(IVirtualRoute), shardingEntry.ShardingRoute);
             }
-            services.AddSingleton<ShardingBootstrapper>();
+
+            var hoHyperConfig = new HoHyperConfig();
+            hoHyperConfig.EnsureCreated = options.EnsureCreated;
+            services.AddSingleton(sp => hoHyperConfig);
+            services.AddHostedService<ShardingBootstrapper>();
             return services;
         }
+
         public static DbContextOptionsBuilder UseShardingSqlServerQuerySqlGenerator(this DbContextOptionsBuilder optionsBuilder)
         {
             optionsBuilder.ReplaceService<IQuerySqlGeneratorFactory, ShardingSqlServerQuerySqlGeneratorFactory>();

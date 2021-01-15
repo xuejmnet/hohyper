@@ -18,6 +18,10 @@ namespace Sharding.Api
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>
             Host.CreateDefaultBuilder(args)
+                .ConfigureAppConfiguration(builder =>
+                {
+                    builder.AddJsonFile("Configs/DbConfig.json");
+                })
                 .ConfigureWebHostDefaults(webBuilder => { webBuilder.UseStartup<Startup>(); });
     }
 }

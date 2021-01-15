@@ -24,5 +24,9 @@ namespace HoHyper.SqlServer
         }
 
         public bool HasSharding => ShardingEntries.IsNotEmpty();
+        /// <summary>
+        /// 创建表如果数据库不存在的话
+        /// </summary>
+        public bool EnsureCreated { get; set; }
     }
 }

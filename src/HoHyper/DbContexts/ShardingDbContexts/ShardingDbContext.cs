@@ -2,6 +2,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using HoHyper.Extensions;
 using HoHyper.Helpers;
 using Microsoft.EntityFrameworkCore;
 
@@ -17,13 +18,15 @@ namespace HoHyper.DbContexts.ShardingDbContexts
     {
         public string Tail { get; }
         public List<VirtualTableDbContextConfig> VirtualTableConfigs { get; }
-        private static readonly ConcurrentDictionary<Type,Type> _entityTypeConfigurationTypeCaches = new ConcurrentDictionary<Type,Type>();
-        private static readonly object buildEntityTypeConfigurationLock=new object();
+        public bool RemoveRemoveShardingEntity { get; }
+        private static readonly ConcurrentDictionary<Type, Type> _entityTypeConfigurationTypeCaches = new ConcurrentDictionary<Type, Type>();
+        private static readonly object buildEntityTypeConfigurationLock = new object();
 
         public ShardingDbContext(ShardingDbContextOptions shardingDbContextOptions) : base(shardingDbContextOptions.DbContextOptions)
         {
             Tail = shardingDbContextOptions.Tail;
             VirtualTableConfigs = shardingDbContextOptions.VirtualTableDbContextConfigs;
+            RemoveRemoveShardingEntity = shardingDbContextOptions.RemoveShardingEntity;
         }
 
         /// <summary>
@@ -38,7 +41,7 @@ namespace HoHyper.DbContexts.ShardingDbContexts
                 VirtualTableConfigs.ForEach(virtualTable =>
                 {
                     var shardingEntityType = virtualTable.ShardingEntityType;
-                    if (!_entityTypeConfigurationTypeCaches.TryGetValue(shardingEntityType,out var entityTypeConfigurationType))
+                    if (!_entityTypeConfigurationTypeCaches.TryGetValue(shardingEntityType, out var entityTypeConfigurationType))
                         throw new Exception($"未找到对应的类型无法进行IEntityTypeConfiguration配置:[{shardingEntityType.Name}]");
                     if (entityTypeConfigurationType == null)
                         throw new NotSupportedException($"{shardingEntityType}的[IBaseEntityTypeConfiguration]未找到");
@@ -47,9 +50,9 @@ namespace HoHyper.DbContexts.ShardingDbContexts
                         .FirstOrDefault(x => x.Name == nameof(ModelBuilder.ApplyConfiguration)
                                              && x.GetParameters().Count() == 1
                                              && x.GetParameters()[0].ParameterType.GetGenericTypeDefinition() == typeof(IEntityTypeConfiguration<>));
-                    method.MakeGenericMethod(shardingEntityType).Invoke(modelBuilder, new object[] { Activator.CreateInstance(entityTypeConfigurationType) });
+                    method.MakeGenericMethod(shardingEntityType).Invoke(modelBuilder, new object[] {Activator.CreateInstance(entityTypeConfigurationType)});
                 });
-                
+
                 VirtualTableConfigs.ForEach(virtualTableConfig =>
                 {
                     var shardingEntity = virtualTableConfig.ShardingEntityType;
@@ -71,18 +74,19 @@ namespace HoHyper.DbContexts.ShardingDbContexts
                 foreach (var entityTypeConfigurationType in _entityTypeConfigurationTypeCaches)
                 {
                     var shardingEntityType = entityTypeConfigurationType.Key;
+                    if (RemoveRemoveShardingEntity && shardingEntityType.IsShardingEntity())
+                        continue;
                     var method = modelBuilder.GetType()
                         .GetMethods()
                         .FirstOrDefault(x => x.Name == nameof(ModelBuilder.ApplyConfiguration)
                                              && x.GetParameters().Count() == 1
                                              && x.GetParameters()[0].ParameterType.GetGenericTypeDefinition() == typeof(IEntityTypeConfiguration<>));
-                    method.MakeGenericMethod(shardingEntityType).Invoke(modelBuilder, new object[] { Activator.CreateInstance(entityTypeConfigurationType.Value) });
-
+                    method.MakeGenericMethod(shardingEntityType).Invoke(modelBuilder, new object[] {Activator.CreateInstance(entityTypeConfigurationType.Value)});
                 }
             }
 
             ////字段注释,需要开启程序集XML文档
-            
+
             //foreach (var entityType in modelBuilder.Model.GetEntityTypes())
             //{
             //    var comments = XmlHelper.GetPropertyCommentBySummary(entityType.ClrType) ?? new Dictionary<string, string>();
@@ -95,30 +99,27 @@ namespace HoHyper.DbContexts.ShardingDbContexts
             //    }
             //}
 //
-// #if !EFCORE2
-//             //字段注释,需要开启程序集XML文档
-//             if (ShardingOption.EnableComments)
-//             {
-//                 foreach (var entityType in modelBuilder.Model.GetEntityTypes())
-//                 {
-//                     var comments = XmlHelper.GetProperyCommentBySummary(entityType.ClrType) ?? new Dictionary<string, string>();
-//                     foreach (var property in entityType.GetProperties())
-//                     {
-//                         if (comments.ContainsKey(property.Name))
-//                         {
-//                             property.SetComment(comments[property.Name]);
-//                         }
-//                     }
-//                 }
-//             }
-// #endif
+#if !EFCORE2
+            //字段注释,需要开启程序集XML文档
+            foreach (var entityType in modelBuilder.Model.GetEntityTypes())
+            {
+                var comments = XmlHelper.GetProperyCommentBySummary(entityType.ClrType) ?? new Dictionary<string, string>();
+                foreach (var property in entityType.GetProperties())
+                {
+                    if (comments.ContainsKey(property.Name))
+                    {
+                        property.SetComment(comments[property.Name]);
+                    }
+                }
+            }
+#endif
         }
+
         /// <summary>
         /// 构建类型
         /// </summary>
-        public void  BuildEntityTypeConfigurationCaches()
+        public void BuildEntityTypeConfigurationCaches()
         {
-            
             if (!_entityTypeConfigurationTypeCaches.Any())
             {
                 lock (buildEntityTypeConfigurationLock)
@@ -128,20 +129,19 @@ namespace HoHyper.DbContexts.ShardingDbContexts
                         var typesToRegister = AssemblyHelper.CurrentDomain.GetAssemblies().SelectMany(o => o.GetTypes())
                             .Where(type => !String.IsNullOrEmpty(type.Namespace))
                             //获取类型namespce不是空的所有接口是范型的当前范型是IEntityTypeConfiguration<>的进行fluent api 映射
-                            .Where(type => !type.IsAbstract&&type.GetInterfaces()
+                            .Where(type => !type.IsAbstract && type.GetInterfaces()
                                 .Any(it => it.IsInterface && it.IsGenericType && it.GetGenericTypeDefinition() == typeof(IEntityTypeConfiguration<>)
-                                           &&it.GetGenericArguments().Any() )
-                            ).ToDictionary(o=>o.GetInterfaces().FirstOrDefault(it=>it.IsInterface && it.IsGenericType && it.GetGenericTypeDefinition() == typeof(IEntityTypeConfiguration<>)
-                                                                                   &&it.GetGenericArguments().Any() )
-                                ?.GetGenericArguments()[0],o=>o);
+                                           && it.GetGenericArguments().Any())
+                            ).ToDictionary(o => o.GetInterfaces().FirstOrDefault(it => it.IsInterface && it.IsGenericType && it.GetGenericTypeDefinition() == typeof(IEntityTypeConfiguration<>)
+                                                                                       && it.GetGenericArguments().Any())
+                                ?.GetGenericArguments()[0], o => o);
                         foreach (var type in typesToRegister)
                         {
-                            _entityTypeConfigurationTypeCaches.TryAdd(type.Key,type.Value);
+                            _entityTypeConfigurationTypeCaches.TryAdd(type.Key, type.Value);
                         }
                     }
                 }
             }
         }
-        
     }
 }
