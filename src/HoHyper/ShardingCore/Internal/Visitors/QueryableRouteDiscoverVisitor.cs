@@ -236,7 +236,7 @@ namespace HoHyper.ShardingCore.Internal.Visitors
                     ExpressionType.LessThanOrEqual => paramterAtLeft ? ShardingOperatorEnum.LessThanOrEqual : ShardingOperatorEnum.GreaterThanOrEqual,
                     ExpressionType.Equal => ShardingOperatorEnum.Equal,
                     ExpressionType.NotEqual => ShardingOperatorEnum.NotEqual,
-                    _ => ShardingOperatorEnum.NotSupport
+                    _ => ShardingOperatorEnum.UnKnown
                 };
 
                 if (value == null)

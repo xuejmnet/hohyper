@@ -31,7 +31,7 @@ namespace Sharding.Api
             services.AddShardingSqlServer(o =>
             {
                 o.ConnectionString = Configuration.GetSection("SqlServer")["ConnectionString"];
-                o.AddSharding<SysUserShardingProvider,SysUserVirtualRoute>();
+                o.AddSharding<SysUserVirtualRoute>();
                 o.EnsureCreated=true;
             });
         }

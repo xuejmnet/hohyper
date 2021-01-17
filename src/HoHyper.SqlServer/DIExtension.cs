@@ -1,11 +1,12 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using HoHyper.DbContexts;
 using HoHyper.DbContexts.VirtualDbContexts;
+using HoHyper.Extensions;
 using HoHyper.Helpers;
 using HoHyper.ShardingCore.Internal;
 using HoHyper.ShardingCore.ShardingAccessors;
-using HoHyper.ShardingCore.ShardingProviders;
 using HoHyper.ShardingCore.VirtualRoutes;
 using HoHyper.ShardingCore.VirtualTables;
 using HoHyper.SqlServer.EFCores;
@@ -43,14 +44,24 @@ namespace HoHyper.SqlServer
             services.AddSingleton<IShardingTableCreator, ShardingTableCreator>();
             services.AddSingleton<IVirtualTableManager, OneDbVirtualTableManager>();
             services.AddSingleton(typeof(IVirtualTable<>), typeof(OneDbVirtualTable<>));
-            services.AddSingleton<IShardingProviderManager, ShardingProviderManager>();
             services.AddSingleton<IShardingAccessor, ShardingAccessor>();
             services.AddSingleton<IShardingScopeFactory, ShardingScopeFactory>();
             services.AddSingleton<IShardingParallelDbContextFactory, ShardingSqlServerParallelDbContextFactory>();
-            foreach (var shardingEntry in options.ShardingEntries)
+            if (options.HasSharding)
             {
-                services.AddSingleton(typeof(IShardingProvider), shardingEntry.ShardingOwner);
-                services.AddSingleton(typeof(IVirtualRoute), shardingEntry.ShardingRoute);
+                foreach (var shardingRoute in options.ShardingRoutes)
+                {
+                    var genericVirtualRoute = shardingRoute.GetInterfaces().FirstOrDefault(it => it.IsInterface && it.IsGenericType && it.GetGenericTypeDefinition() == typeof(IVirtualRoute<>)
+                                                                                                && it.GetGenericArguments().Any());
+                    if (genericVirtualRoute == null)
+                        throw new ArgumentException("add sharding route type error not assignable from IVirtualRoute<>.");
+                    var shardingEntity=genericVirtualRoute.GetGenericArguments()[0];
+                    if(!shardingEntity.IsShardingEntity())
+                        throw new ArgumentException("add sharding route type error generic arguments first not assignable from IShardingEntity.");
+                    Type genericType = typeof(IVirtualRoute<>);
+                    Type interfaceType = genericType.MakeGenericType(shardingEntity);
+                    services.AddSingleton(interfaceType, shardingRoute);
+                }
             }
 
             var hoHyperConfig = new HoHyperConfig();

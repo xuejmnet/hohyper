@@ -46,5 +46,10 @@ namespace HoHyper.ShardingCore.VirtualRoutes.Abstractions
         }
 
         public abstract IPhysicTable RouteWithValue(List<IPhysicTable> allPhysicTables, object shardingKeyValue);
+        /// <summary>
+        /// 返回数据库现有的尾巴
+        /// </summary>
+        /// <returns></returns>
+        public abstract List<string> GetAllTails();
     }
 }

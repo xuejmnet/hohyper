@@ -11,7 +11,7 @@ namespace HoHyper.ShardingCore.VirtualRoutes
     public enum ShardingOperatorEnum
     {
         [Description("??")]
-        NotSupport,
+        UnKnown,
         [Description(">")]
         GreaterThan,
         [Description(">=")]

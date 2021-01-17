@@ -80,7 +80,7 @@ namespace HoHyper
         private void CreateDataTable(IVirtualTable virtualTable)
         {
             var shardingConfig = virtualTable.ShardingConfig;
-            foreach (var tail in virtualTable.GetShardingProviderTails())
+            foreach (var tail in virtualTable.GetTaleAllTails())
             {
                 if (shardingConfig.AutoCreateTable)
                 {

@@ -34,10 +34,7 @@ namespace HoHyper.ShardingCore.Internal.Visitors
                 var dbContextDependencies = typeof(DbContext).GetTypePropertyValue(_dbContext, "DbContextDependencies") as IDbContextDependencies;
                 var targetIQ = (IQueryable)((IDbSetCache)_dbContext).GetOrAddSet(dbContextDependencies.SetSource, queryable.ElementType);
                 var newQueryable = targetIQ.Provider.CreateQuery((Expression) Expression.Call((Expression) null, typeof(EntityFrameworkQueryableExtensions).GetTypeInfo().GetDeclaredMethod("AsNoTracking").MakeGenericMethod(queryable.ElementType), targetIQ.Expression));
-                if (Source == null)
-                {
-                    Source = newQueryable;
-                }
+                Source = newQueryable;
 return base.Visit(Expression.Constant(newQueryable));
                  // return Expression.Constant(newQueryable);
             }

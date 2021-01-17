@@ -40,7 +40,7 @@ namespace HoHyper.ShardingCore.VirtualRoutes.Abstractions
         {
             switch (shardingOperator)
             {
-                case ShardingOperatorEnum.NotSupport:
+                case ShardingOperatorEnum.UnKnown:
                     _logger.LogWarning($"没有找到对应的匹配需要进行多表扫描:ShardingOperator:[{shardingOperator}]");
                     return tail => true;
                     //throw new NotSupportedException(xxxx);

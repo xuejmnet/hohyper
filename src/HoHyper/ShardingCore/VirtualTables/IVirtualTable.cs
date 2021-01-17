@@ -59,10 +59,10 @@ namespace HoHyper.ShardingCore.VirtualTables
         IVirtualRoute GetVirtualRoute();
         /// <summary>
         /// 获取启动时已经存在的表后缀 get this virtual table exists tails when app start
-        /// <see cref="ShardingBootstrapper.CreateDateTable(IVirtualTable)"/>
+        /// <see cref="ShardingBootstrapper"/> CreateDateTables
         /// </summary>
         /// <returns></returns>
-        List<string> GetShardingProviderTails();
+        List<string> GetTaleAllTails();
     }
 
     public interface IVirtualTable<T> : IVirtualTable where T : class, IShardingEntity

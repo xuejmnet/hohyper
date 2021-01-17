@@ -3,7 +3,7 @@ using HoHyper.EFCores;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Query.Internal;
-
+using Microsoft.Extensions.Logging;
 #if EFCORE2
 using System.Data.SqlClient;
 #endif
@@ -24,12 +24,13 @@ namespace HoHyper.SqlServer
         private DbContextOptions _dbContextOptions;
         private SqlConnection _connection;
 
-        public SqlServerDbContextOptionsProvider(SqlServerOptions sqlServerOptions)
+        public SqlServerDbContextOptionsProvider(SqlServerOptions sqlServerOptions,ILoggerFactory loggerFactory)
         {
             _connection=new SqlConnection(sqlServerOptions.ConnectionString);
             _dbContextOptions = new DbContextOptionsBuilder()
                 .UseSqlServer(_connection)
                 .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking)
+                .UseLoggerFactory(loggerFactory)
                 .ReplaceService<IQueryCompiler, ShardingQueryCompiler>()
                 .ReplaceService<IModelCacheKeyFactory, ShardingModelCacheKeyFactory>()
                 .UseShardingSqlServerQuerySqlGenerator()

@@ -34,6 +34,12 @@ namespace HoHyper.ShardingCore.VirtualRoutes
         /// <param name="shardingKeyValue"></param>
         /// <returns></returns>
         IPhysicTable RouteWithValue(List<IPhysicTable> allPhysicTables, object shardingKeyValue);
+        /// <summary>
+        /// 获取所有的目前数据库存在的尾巴
+        /// get all tails in the db
+        /// </summary>
+        /// <returns></returns>
+        List<string> GetAllTails();
     }
 
     public interface IVirtualRoute<T> : IVirtualRoute where T : class, IShardingEntity

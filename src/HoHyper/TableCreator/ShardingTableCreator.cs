@@ -61,8 +61,8 @@ namespace HoHyper.TableCreator
                     }
                     catch (Exception ex)
                     {
-                        _logger.LogWarning($"create table error：{ex}");
-                        throw new ShardingCreateException("create table error:", ex);
+                        _logger.LogWarning($"create table error maybe table:[{virtualTable.GetOriginalTableName()}_{virtualTable.ShardingConfig.TailPrefix}_{tail}]");
+                        throw new ShardingCreateException(" create table error :", ex);
                     }
 
                 }

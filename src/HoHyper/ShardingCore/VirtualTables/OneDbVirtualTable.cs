@@ -5,9 +5,9 @@ using System.Linq.Expressions;
 using HoHyper.Exceptions;
 using HoHyper.Extensions;
 using HoHyper.ShardingCore.PhysicTables;
-using HoHyper.ShardingCore.ShardingProviders;
 using HoHyper.ShardingCore.VirtualRoutes;
 using HoHyper.Utils;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace HoHyper.ShardingCore.VirtualTables
 {
@@ -23,15 +23,15 @@ namespace HoHyper.ShardingCore.VirtualTables
     /// <typeparam name="T"></typeparam>
     public class OneDbVirtualTable<T> : IVirtualTable<T> where T : class, IShardingEntity
     {
-        private readonly IShardingProvider<T> _shardingProvider;
+        private readonly IVirtualRoute<T> _virtualRoute;
 
         public Type EntityType => typeof(T);
         public ShardingEntityConfig ShardingConfig { get; }
         private readonly List<IPhysicTable> _physicTables = new List<IPhysicTable>();
 
-        public OneDbVirtualTable(IShardingProviderManager shardingProviderManager)
+        public OneDbVirtualTable(IServiceProvider serviceProvider)
         {
-            _shardingProvider = shardingProviderManager.GetShardingOwner<T>() ?? throw new ShardingOwnerNotFoundException($"{EntityType}");
+            _virtualRoute = serviceProvider.GetService<IVirtualRoute<T>>() ?? throw new ShardingOwnerNotFoundException($"{EntityType}");
             ShardingConfig = ShardingKeyUtil.Parse(EntityType);
         }
 
@@ -42,7 +42,7 @@ namespace HoHyper.ShardingCore.VirtualTables
 
         public List<IPhysicTable> RouteTo(RouteConfig routeConfig)
         {
-            var route = _shardingProvider.GetShardingRoute();
+            var route = _virtualRoute;
             if (routeConfig.UseQueryable())
                 return route.RouteWithWhere(_physicTables, routeConfig.GetQueryable());
             if (routeConfig.UsePredicate())
@@ -85,14 +85,14 @@ namespace HoHyper.ShardingCore.VirtualTables
             return GetVirtualRoute();
         }
 
-        public List<string> GetShardingProviderTails()
+        public List<string> GetTaleAllTails()
         {
-            return _shardingProvider.GetExistsPhysicTableTails();
+            return _virtualRoute.GetAllTails();
         }
 
         public IVirtualRoute<T> GetVirtualRoute()
         {
-            return _shardingProvider.GetShardingRoute();
+            return _virtualRoute;
         }
     }
 }

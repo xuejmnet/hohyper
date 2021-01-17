@@ -145,11 +145,20 @@ namespace HoHyper.DbContexts.VirtualDbContexts
 
         public async Task<int> SaveChangesAsync()
         {
+            var transOpenNow = false;
+            if (!_dbTransaction.IsOpened)
+            {
+                transOpenNow = true;
+                BeginTransaction();
+            }
             var effects = 0;
             foreach (var dbContextCache in _dbContextCaches)
             {
                 effects += await dbContextCache.Value.SaveChangesAsync();
             }
+
+            if (transOpenNow&&_dbTransaction.IsOpened)
+                await _dbTransaction.CommitAsync();
 
             return effects;
         }
@@ -234,11 +243,19 @@ namespace HoHyper.DbContexts.VirtualDbContexts
 
         public int SaveChanges()
         {
+            var transOpenNow = false;
+            if (!_dbTransaction.IsOpened)
+            {
+                transOpenNow = true;
+                BeginTransaction();
+            }
             var effects = 0;
             foreach (var dbContextCache in _dbContextCaches)
             {
                 effects += dbContextCache.Value.SaveChanges();
             }
+            if (transOpenNow&&_dbTransaction.IsOpened)
+               _dbTransaction.Commit();
 
             return effects;
         }

@@ -1,7 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using HoHyper.Extensions;
 using HoHyper.ShardingCore;
-using HoHyper.ShardingCore.ShardingProviders;
 using HoHyper.ShardingCore.VirtualRoutes;
 
 namespace HoHyper.SqlServer
@@ -14,18 +14,17 @@ namespace HoHyper.SqlServer
 */
     public class SqlServerOptions
     {
-        public LinkedList<ShardingEntry> ShardingEntries=new LinkedList<ShardingEntry>();
+        public LinkedList<Type> ShardingRoutes=new LinkedList<Type>();
         public  string ConnectionString { get; set; }
 
-        public void AddSharding<TOwner,TRoute>()where TOwner:IShardingProvider
-        where TRoute:IVirtualRoute
+        public void AddSharding<TRoute>()where TRoute:IVirtualRoute
         {
-            ShardingEntries.AddLast(new ShardingEntry(typeof(TOwner), typeof(TRoute)));
+            ShardingRoutes.AddLast(typeof(TRoute));
         }
 
-        public bool HasSharding => ShardingEntries.IsNotEmpty();
+        public bool HasSharding => ShardingRoutes.IsNotEmpty();
         /// <summary>
-        /// 创建表如果数据库不存在的话
+        /// 创建表如果数据库不存在的话，创建的表是非sharding表
         /// </summary>
         public bool EnsureCreated { get; set; }
     }

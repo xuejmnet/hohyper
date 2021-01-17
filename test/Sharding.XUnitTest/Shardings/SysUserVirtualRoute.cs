@@ -5,9 +5,9 @@ using System.Text;
 using HoHyper.ShardingCore.VirtualRoutes;
 using HoHyper.ShardingCore.VirtualRoutes.Abstractions;
 using Microsoft.Extensions.Logging;
-using Sharding.Api.Domain.Entities;
+using Sharding.XUnitTest.Domain.Entities;
 
-namespace Sharding.Api.Shardings
+namespace Sharding.XUnitTest.Shardings
 {
 /*
 * @Author: xjm
@@ -15,7 +15,7 @@ namespace Sharding.Api.Shardings
 * @Date: Thursday, 14 January 2021 15:39:27
 * @Email: 326308290@qq.com
 */
-    public class SysUserVirtualRoute : AbstractShardingOperatorVirtualRoute<SysUser, string>
+    public class SysUserVirtualRoute : AbstractShardingOperatorVirtualRoute<SysUserMod, string>
     {
         private readonly ILogger<SysUserVirtualRoute> _logger;
         private int _mod = 3;
