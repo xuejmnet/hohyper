@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
 using HoHyper.ShardingCore.VirtualRoutes;
@@ -34,7 +35,7 @@ namespace Sharding.XUnitTest.Shardings
         {
             var shardingKeyStr = ConvertToShardingKey(shardingKey);
             var bytes = Encoding.Default.GetBytes(shardingKeyStr);
-            return Math.Abs(BitConverter.ToInt32(bytes, 0) % _mod).ToString();
+            return Math.Abs(bytes.Sum(o=>o) % _mod).ToString();
         }
 
         public override List<string> GetAllTails()
@@ -48,7 +49,6 @@ namespace Sharding.XUnitTest.Shardings
             switch (shardingOperator)
             {
                 case ShardingOperatorEnum.Equal: return tail => tail == t;
-                case ShardingOperatorEnum.NotEqual: return tail => tail != t;
                 default:
                 {
                     _logger.LogWarning($"shardingOperator is not equal scan all table tail");

@@ -11,7 +11,6 @@ using HoHyper.ShardingCore.VirtualTables;
 using HoHyper.TableCreator;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
 namespace HoHyper
@@ -22,7 +21,7 @@ namespace HoHyper
 * @Date: Monday, 21 December 2020 09:10:07
 * @Email: 326308290@qq.com
 */
-    public class ShardingBootstrapper : BackgroundService
+    public class ShardingBootstrapper 
     {
         private readonly IServiceProvider _serviceProvider;
         private readonly IVirtualTableManager _virtualTableManager;
@@ -97,12 +96,6 @@ namespace HoHyper
                 //添加物理表
                 virtualTable.AddPhysicTable(new DefaultPhysicTable(virtualTable.GetOriginalTableName(), virtualTable.ShardingConfig.TailPrefix, tail, virtualTable.EntityType));
             }
-        }
-
-        protected override Task ExecuteAsync(CancellationToken stoppingToken)
-        {
-            Start();
-            return Task.CompletedTask;
         }
     }
 }

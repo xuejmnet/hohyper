@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using HoHyper.Extensions;
 using HoHyper.ShardingCore;
 using HoHyper.ShardingCore.VirtualRoutes;

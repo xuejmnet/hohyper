@@ -3,9 +3,11 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using HoHyper;
 using HoHyper.DbContexts.VirtualDbContexts;
 using HoHyper.Extensions;
 using HoHyper.SqlServer;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -47,12 +49,19 @@ namespace Sharding.XUnitTest
         }
 
         // 可以添加要用到的方法参数，会自动从注册的服务中获取服务实例，类似于 asp.net core 里 Configure 方法
-        public void Configure(IServiceProvider applicationServices)
+        public void Configure(IServiceProvider serviceProvider)
         {
+            var shardingBootstrapper = serviceProvider.GetService<ShardingBootstrapper>();
+            shardingBootstrapper.Start();
             // 有一些测试数据要初始化可以放在这里
-           InitData(applicationServices).GetAwaiter().GetResult();
+           InitData(serviceProvider).GetAwaiter().GetResult();
         }
 
+        /// <summary>
+        /// 添加种子数据
+        /// </summary>
+        /// <param name="serviceProvider"></param>
+        /// <returns></returns>
         private  async Task InitData(IServiceProvider serviceProvider)
         {
             using (var scope = serviceProvider.CreateScope())

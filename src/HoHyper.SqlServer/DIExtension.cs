@@ -63,11 +63,10 @@ namespace HoHyper.SqlServer
                     services.AddSingleton(interfaceType, shardingRoute);
                 }
             }
-
             var hoHyperConfig = new HoHyperConfig();
             hoHyperConfig.EnsureCreated = options.EnsureCreated;
             services.AddSingleton(sp => hoHyperConfig);
-            services.AddHostedService<ShardingBootstrapper>();
+            services.AddSingleton<ShardingBootstrapper>();
             return services;
         }
 
