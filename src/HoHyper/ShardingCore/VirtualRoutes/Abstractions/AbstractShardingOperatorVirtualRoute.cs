@@ -46,7 +46,7 @@ namespace HoHyper.ShardingCore.VirtualRoutes.Abstractions
             }
 
             if (physicTables.Count > 1)
-                throw new ShardingKeyRouteMoreException($"表:{string.Join(",", physicTables.Select(o => $"[{o.FullName}]"))}");
+                throw new ShardingKeyRouteMoreException($"table:{string.Join(",", physicTables.Select(o => $"[{o.FullName}]"))}");
             return physicTables[0];
         }
     }

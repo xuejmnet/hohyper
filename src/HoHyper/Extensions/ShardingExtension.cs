@@ -38,7 +38,7 @@ namespace HoHyper.Extensions
         /// <param name="pageSize"></param>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        public static async Task<PagedResult<T>> ToShardingPageResultAsync<T>(this IQueryable<T> source, int pageIndex, int pageSize)
+        public static async Task<ShardingPagedResult<T>> ToShardingPageResultAsync<T>(this IQueryable<T> source, int pageIndex, int pageSize)
         {
             //设置每次获取多少页
             var take = pageSize <= 0 ? 1 : pageSize;
@@ -51,13 +51,13 @@ namespace HoHyper.Extensions
             
             //当数据库数量小于要跳过的条数就说明没数据直接返回不在查询list
             if (count <= skip)
-                return new PagedResult<T>(new List<T>(0), count);
+                return new ShardingPagedResult<T>(new List<T>(0), count);
             //获取剩余条数
             int remainingCount = count - skip;
             //当剩余条数小于take数就取remainingCount
             var realTake = remainingCount < take ? remainingCount : take;
             var data = await new ShardingQueryable<T>(source.Skip(skip).Take(realTake)).ToListAsync();
-            return new PagedResult<T>(data, count);
+            return new ShardingPagedResult<T>(data, count);
         }
         /// <summary>
         /// 分页

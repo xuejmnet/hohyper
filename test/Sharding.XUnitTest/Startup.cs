@@ -43,7 +43,8 @@ namespace Sharding.XUnitTest
             services.AddShardingSqlServer(o =>
             {
                 o.ConnectionString = hostBuilderContext.Configuration.GetSection("SqlServer")["ConnectionString"];
-                o.AddSharding<SysUserVirtualRoute>();
+                o.AddSharding<SysUserModVirtualRoute>();
+                o.AddSharding<SysUserRangeVirtualRoute>();
                 o.EnsureCreated = true;
             });
         }
@@ -69,11 +70,11 @@ namespace Sharding.XUnitTest
                 var virtualDbContext = scope.ServiceProvider.GetService<IVirtualDbContext>();
                 if (!await virtualDbContext.Set<SysUserMod>().ShardingAnyAsync(o => true))
                 {
-                    var ids = Enumerable.Range(1, 100);
-                    var users = new List<SysUserMod>();
+                    var ids = Enumerable.Range(1, 1000);
+                    var userMods = new List<SysUserMod>();
                     foreach (var id in ids)
                     {
-                        users.Add(new SysUserMod()
+                        userMods.Add(new SysUserMod()
                         {
                             Id = id.ToString(),
                             Age = id,
@@ -81,7 +82,21 @@ namespace Sharding.XUnitTest
                         });
                     }
 
-                    await virtualDbContext.InsertRangeAsync(users);
+                    await virtualDbContext.InsertRangeAsync(userMods);
+                    
+                    
+                    var userRanges = new List<SysUserRange>();
+                    foreach (var id in ids)
+                    {
+                        userRanges.Add(new SysUserRange()
+                        {
+                            Id = id.ToString(),
+                            Age = id,
+                            Name = $"name_range_{id}"
+                        });
+                    }
+
+                    await virtualDbContext.InsertRangeAsync(userRanges);
                     await virtualDbContext.SaveChangesAsync();
                 }
             }

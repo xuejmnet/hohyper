@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 
 namespace HoHyper.Common
 {
@@ -6,7 +6,7 @@ namespace HoHyper.Common
     /// 分页集合
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public class PagedResult<T>
+    public class ShardingPagedResult<T>
     {
 
         #region Ctor
@@ -15,7 +15,7 @@ namespace HoHyper.Common
         /// </summary>
         /// <param name="total">总记录数。</param>
         /// <param name="data">当前页面的数据。</param>
-        public PagedResult(List<T> data, int total)
+        public ShardingPagedResult(List<T> data, int total)
         {
             this.Total = total;
             this.Data = data;
