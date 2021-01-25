@@ -1,5 +1,6 @@
 using System;
 using System.Linq.Expressions;
+using System.Reflection;
 
 namespace HoHyper.Extensions
 {
@@ -11,6 +12,34 @@ namespace HoHyper.Extensions
 */
     public static class ExpressionExtension
     {
+        public static object GetValueByExpression(this object obj, string propertyExpression)
+        {
+            var entityType = obj.GetType();
+            PropertyInfo property;
+            Expression propertyAccess;
+            var parameter = Expression.Parameter(entityType, "o");
+
+            if (propertyExpression.Contains("."))
+            {
+                String[] childProperties = propertyExpression.Split('.');
+                property = entityType.GetProperty(childProperties[0]);
+                propertyAccess = Expression.MakeMemberAccess(parameter, property);
+                for (int i = 1; i < childProperties.Length; i++)
+                {
+                    property = property.PropertyType.GetProperty(childProperties[i]);
+                    propertyAccess = Expression.MakeMemberAccess(propertyAccess, property);
+                }
+            }
+            else
+            {
+                property = entityType.GetProperty(propertyExpression);
+                propertyAccess = Expression.MakeMemberAccess(parameter, property);
+            }
+
+            var lambda = Expression.Lambda(propertyAccess, parameter);
+            Delegate fn = lambda.Compile();
+            return fn.DynamicInvoke(obj);
+        }
 
         /// <summary>
         /// 添加And条件
@@ -20,8 +49,8 @@ namespace HoHyper.Extensions
         /// <param name="second"></param>
         /// <returns></returns>
         public static Expression<Func<T, bool>> And<T>(
-        this Expression<Func<T, bool>> first,
-        Expression<Func<T, bool>> second)
+            this Expression<Func<T, bool>> first,
+            Expression<Func<T, bool>> second)
         {
             return first.AndAlso(second, Expression.AndAlso);
         }
@@ -49,9 +78,9 @@ namespace HoHyper.Extensions
         /// <param name="func"></param>
         /// <returns></returns>
         private static Expression<Func<T, bool>> AndAlso<T>(
-        this Expression<Func<T, bool>> expr1,
-        Expression<Func<T, bool>> expr2,
-        Func<Expression, Expression, BinaryExpression> func)
+            this Expression<Func<T, bool>> expr1,
+            Expression<Func<T, bool>> expr2,
+            Func<Expression, Expression, BinaryExpression> func)
         {
             var parameter = Expression.Parameter(typeof(T));
             var leftVisitor = new ReplaceExpressionVisitor(expr1.Parameters[0], parameter);
