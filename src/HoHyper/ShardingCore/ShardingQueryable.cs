@@ -6,12 +6,17 @@ using System.Threading.Tasks;
 using HoHyper.DbContexts;
 using HoHyper.Extensions;
 using HoHyper.ShardingCore.Internal;
+using HoHyper.ShardingCore.Internal.StreamMerge;
 using HoHyper.ShardingCore.ShardingAccessors;
 using HoHyper.ShardingCore.VirtualRoutes;
 using HoHyper.ShardingCore.VirtualTables;
 using HoHyper.ShardingExtensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+
+#if EFCORE2
+using Microsoft.EntityFrameworkCore.Extensions.Internal;
+#endif
 
 namespace HoHyper.ShardingCore
 {
@@ -108,7 +113,7 @@ namespace HoHyper.ShardingCore
 
         public async Task<List<T>> ToListAsync()
         {
-            return await GetShardingListQueryAsync(async queryable => await EntityFrameworkQueryableExtensions.ToListAsync((IQueryable<T>) queryable));
+            return await GetShardingListQueryAsync();
         }
 
 
@@ -302,13 +307,13 @@ namespace HoHyper.ShardingCore
 
         #region 处理list
 
-        private async Task<List<TResult>> GetShardingListQueryAsync<TResult>(Func<IQueryable, Task<List<TResult>>> efQuery)
+        private async Task<List<T>> GetShardingListQueryAsync()
         {
             GetQueryableRoutes();
             //本次查询仅一张表是对应多个数据源的情况
             if (_endRoutes.Values.Count(o => o.Count > 1) == 1)
             {
-                return await GetShardingMultiListQueryAsync(efQuery);
+                return await GetShardingMultiListQueryAsync();
             }
             else
             {
@@ -318,61 +323,80 @@ namespace HoHyper.ShardingCore
                     Console.WriteLine("存在性能可能有问题");
                 }
 #endif
-                return await GetShardingSingleListQueryAsync(efQuery);
+                return await GetShardingSingleListQueryAsync();
             }
         }
 
-        private async Task<List<TResult>> GetShardingSingleListQueryAsync<TResult>(Func<IQueryable, Task<List<TResult>>> efQuery)
+        private async Task<IAsyncEnumerator<T>> GetAsyncEnumerator()
+        {   
+            using (var scope = _shardingScopeFactory.CreateScope())
+            {
+                BeginShardingQuery(scope);
+#if !EFCORE2
+            
+                var enumator = _source.AsAsyncEnumerable().GetAsyncEnumerator();
+                await enumator.MoveNextAsync();    
+#endif
+#if EFCORE2
+            
+                var enumator = _source.AsAsyncEnumerable().GetEnumerator();
+                await enumator.MoveNext();    
+#endif
+                return enumator;
+            }
+        }
+
+        private async Task<List<T>> GetShardingSingleListQueryAsync()
         {
             using (var scope = _shardingScopeFactory.CreateScope())
             {
                 BeginShardingQuery(scope);
-                return await efQuery(_source);
+                return await _source.ToListAsync();
             }
         }
 
-        private async Task<List<TResult>> GetShardingMultiListQueryAsync<TResult>(Func<IQueryable, Task<List<TResult>>> efQuery)
+        private async Task<List<T>> GetShardingMultiListQueryAsync()
         {
             var extraEntry = _source.GetExtraEntry();
             //去除分页,获取前Take+Skip数量
             int? take = extraEntry.Take;
             int skip = extraEntry.Skip.GetValueOrDefault();
 
-
             var noPageSource = _source.RemoveTake().RemoveSkip();
             if (take.HasValue)
                 noPageSource = noPageSource.Take(take.Value + skip);
             //从各个分表获取数据
             var multiRouteEntry = _endRoutes.FirstOrDefault(o => o.Value.Count() > 1);
-            var tasks = multiRouteEntry.Value.Select(tail =>
-            {
-                return Task.Run(async () =>
-                {
-                    using (var shardingDbContext = _shardingParallelDbContextFactory.Create(string.Empty))
-                    {
-                        var newQ = (IQueryable<T>) noPageSource.ReplaceDbContextQueryable(shardingDbContext);
-                        var shardingQueryable = new ShardingQueryable<T>(newQ);
-                        shardingQueryable.DisableAutoRouteParse();
-                        shardingQueryable.AddManualRoute(multiRouteEntry.Key, tail);
-                        foreach (var singleRouteEntry in _endRoutes.Where(o => o.Key != multiRouteEntry.Key))
-                        {
-                            shardingQueryable.AddManualRoute(singleRouteEntry.Key, singleRouteEntry.Value[0]);
-                        }
+            List<DbContext> parallelDbContexts = new List<DbContext>(multiRouteEntry.Value.Count);
+           var enumatorTasks= multiRouteEntry.Value.Select(tail =>
+           {
+               return Task.Run(async () =>
+               {
+                   var shardingDbContext = _shardingParallelDbContextFactory.Create(string.Empty);
+                   parallelDbContexts.Add(shardingDbContext);
+                   var newQ = (IQueryable<T>) noPageSource.ReplaceDbContextQueryable(shardingDbContext);
+                   var shardingQueryable = new ShardingQueryable<T>(newQ);
+                   shardingQueryable.DisableAutoRouteParse();
+                   shardingQueryable.AddManualRoute(multiRouteEntry.Key, tail);
+                   foreach (var singleRouteEntry in _endRoutes.Where(o => o.Key != multiRouteEntry.Key))
+                   {
+                       shardingQueryable.AddManualRoute(singleRouteEntry.Key, singleRouteEntry.Value[0]);
+                   }
+#if !EFCORE2
+                   return await shardingQueryable.GetAsyncEnumerator();
+#endif
+#if EFCORE2
 
-                        return await shardingQueryable.GetShardingListQueryAsync(efQuery);
-                    }
-                });
-            }).ToArray();
-            var all = (await Task.WhenAll(tasks)).SelectMany(o => o).ToList();
-            //合并数据
-            var resList = all;
-            if (extraEntry.Orders.Any())
-                resList = resList.AsQueryable().OrderWithExpression(extraEntry.Orders).ToList();
-            if (skip > 0)
-                resList = resList.Skip(skip).ToList();
-            if (take.HasValue)
-                resList = resList.Take(take.Value).ToList();
-            return resList;
+                return await shardingQueryable.GetAsyncEnumerator();
+#endif
+               });
+           }).ToArray();
+           var enumators = (await Task.WhenAll(enumatorTasks)).ToList();
+            var engine=new StreamMergeListEngine<T>(new StreamMergeContext(extraEntry.Skip,extraEntry.Take,extraEntry.Orders), enumators);
+
+            var result= await engine.Execute();
+            parallelDbContexts.ForEach(o=>o.Dispose());
+            return result;
         }
 
         #endregion

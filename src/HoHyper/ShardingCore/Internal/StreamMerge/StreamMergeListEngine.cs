@@ -28,11 +28,15 @@ namespace HoHyper.ShardingCore.Internal.StreamMerge
             var skip = _mergeContext.Skip;
             var take = _mergeContext.Take;
             var list = new List<T>(skip.GetValueOrDefault() + take ?? defaultCapacity);
-            var enumerator=new MultiAsyncEnumerator<T>(_mergeContext,_sources);
-            await enumerator.LinkAsync();
+            var enumerator=new OrderAsyncEnumerator<T>(_mergeContext,_sources);
             var realSkip = 0;
             var realTake = 0;
+#if !EFCORE2
             while (await enumerator.MoveNextAsync())
+#endif
+#if EFCORE2
+            while (await enumerator.MoveNext())
+#endif
             {
                 //获取真实的需要跳过的条数
                 if (skip.HasValue)

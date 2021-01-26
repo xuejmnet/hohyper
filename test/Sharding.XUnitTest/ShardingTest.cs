@@ -32,6 +32,16 @@ namespace Sharding.XUnitTest
             Assert.Equal(1000,ranges.Count);
         }
         [Fact]
+        public async Task ToList1_OrderBy()
+        {
+            var modascs=await _virtualDbContext.Set<SysUserMod>().OrderBy(o=>o.Age).ToShardingListAsync();
+            Assert.Equal(100,modascs.Count);
+            Assert.Equal(100,modascs.Last().Age);
+            var moddescs=await _virtualDbContext.Set<SysUserMod>().OrderByDescending(o=>o.Age).ToShardingListAsync();
+            Assert.Equal(100,moddescs.Count);
+            Assert.Equal(1,moddescs.Last().Age);
+        }
+        [Fact]
         public async Task ToList2()
         {
             var ids = new[] {"1", "2", "3", "4"};
